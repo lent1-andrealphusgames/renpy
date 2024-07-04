@@ -95,7 +95,7 @@ def write_multipart(f, headers, content):
 
     return rv
 
-def download_ranges(url, ranges, destination, progress_callback=None):
+def download_ranges(url, ranges, destination, progress_callback=None, headers=None):
     """
     `url`
         The URL to download from.
@@ -128,12 +128,14 @@ def download_ranges(url, ranges, destination, progress_callback=None):
 
             old_ranges = list(ranges)
 
-            headers = {
+            range_headers = {
                 'Range' : 'bytes=' + ', '.join('%d-%d' % (start, end) for start, end in ranges[:10]),
                 "Accept-Encoding": "identity",
                 }
+            if headers:
+                range_headers.update(headers)
 
-            r = requests.get(url, headers=headers, stream=True, timeout=10, proxies=renpy.exports.proxies)
+            r = requests.get(url, headers=range_headers, stream=True, timeout=10, proxies=renpy.exports.proxies)
             r.raise_for_status()
 
             blocks = [ ]
@@ -178,7 +180,7 @@ def download_ranges(url, ranges, destination, progress_callback=None):
 
 
 
-def download(url, ranges, destination, progress_callback=None):
+def download(url, ranges, destination, progress_callback=None, headers=None):
     """
     Downloads the file. First tries to use ranges, and if that fails
     downloads the entire file.
@@ -201,7 +203,7 @@ def download(url, ranges, destination, progress_callback=None):
 
 
     try:
-        if download_ranges(url, ranges, destination, progress_callback=progress_callback):
+        if download_ranges(url, ranges, destination, progress_callback=progress_callback, headers=headers):
             return
     except Exception:
         pass
@@ -211,8 +213,11 @@ def download(url, ranges, destination, progress_callback=None):
 
     total_size = sum(i[1] for i in ranges)
     downloaded = 0
-
-    r = requests.get(url, stream=True, headers={"Accept-Encoding": "identity"}, timeout=10, proxies=renpy.exports.proxies)
+    if headers:
+        headers["Accept-Encoding"] = "identity"
+    else:
+        headers = {"Accept-Encoding": "identity"}
+    r = requests.get(url, stream=True, headers=headers, timeout=10, proxies=renpy.exports.proxies)
     r.raise_for_status()
 
     blocks = [ ]

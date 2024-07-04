@@ -20,6 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import division, absolute_import, with_statement, print_function, unicode_literals
+
 from renpy.compat import PY2, basestring, bchr, bord, chr, open, pystr, range, round, str, tobytes, unicode # *
 
 import argparse
@@ -98,8 +99,8 @@ class Update(object):
             If true, files that are not in the new file list are removed as soon
             as they are no longer needed.
         """
-
         self.url = url
+        self.headers = headers
 
         self.targetdir = targetdir
         self.oldlists = oldlists
@@ -506,7 +507,7 @@ class Update(object):
             self.download_done = old_download_done + done
             self.download_patch_progress()
 
-        download.download(url, ranges, filename, download_progress)
+        download.download(url, ranges, filename, download_progress, headers=self.headers)
 
         return filename
 
