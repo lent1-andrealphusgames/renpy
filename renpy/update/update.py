@@ -74,7 +74,7 @@ class Plan(object):
 
 class Update(object):
 
-    def __init__(self, url, newlists, targetdir, oldlists, progress_callback=None, logfile=None, aggressive_removal=False):
+    def __init__(self, url, newlists, targetdir, oldlists, progress_callback=None, logfile=None, aggressive_removal=False, headers=None):
         """
         `url`
             The url that's used as a base to download pack files from.
